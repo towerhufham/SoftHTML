@@ -1,0 +1,12 @@
+{
+  "name": "softhtml",
+  "version": "0.1.0",
+  "description": "An HTML Preprocessor for the framework age",
+  "main": "index.mjs",
+  "author": "Tower Hufham",
+  "license": "MIT",
+  "private": false,
+  "dependencies": {
+    "commander": "^9.4.1"
+  }
+}
