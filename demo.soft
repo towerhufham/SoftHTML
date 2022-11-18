@@ -6,3 +6,11 @@ h2 Subheader
 
 p Look at all this text, man! So much text!
 italic py-4
+
+a Click Here
+@href www.google.com/beans
+@title To Google
+underline hover:text-red-500
+
+div
+flex flex-col
