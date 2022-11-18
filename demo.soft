@@ -12,10 +12,8 @@ a Click Here
 @title To Google
 underline hover:text-red-500
 
-div
-flex flex-col
-    div
-    flex
+div.flex flex-col
+    div .flex
         article
         rounded-full
             p hi!

@@ -60,9 +60,16 @@ const parseElement = elementText => {
     for (const line of lines) {
         //if we haven't found a tag, first thing is the tag
         if (tag == "") {
-            tag = line.match(/(\S+)( \S+)?/)[1]
-            const contentMatch = line.match(/ (.+)/)
-            if (contentMatch) content = contentMatch[1]
+            tag = line.match(/([\w\d]+)( \S+)?/)[1]
+            //one-line shortcuts look like...
+            if (/\S+ ?\./.test(line)) {
+                ///tag.class
+                classes.push(line.match(/\S+ ?\.(.+)/)[1])
+            } else {
+                //anything else is content
+                const contentMatch = line.match(/ (.+)/)
+                if (contentMatch) content = contentMatch[1]
+            }
         } else {
             //element has been started
             //empty line finishes element
