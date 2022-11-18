@@ -14,6 +14,6 @@ underline hover:text-red-500
 
 div.flex flex-col
     div .flex
-        article
-        rounded-full
+        article @id art
+        @x-data {cool: "beans!"}
             p hi!

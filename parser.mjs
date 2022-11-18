@@ -63,8 +63,15 @@ const parseElement = elementText => {
             tag = line.match(/([\w\d]+)( \S+)?/)[1]
             //one-line shortcuts look like...
             if (/\S+ ?\./.test(line)) {
-                ///tag.class
+                ///tag .class
                 classes.push(line.match(/\S+ ?\.(.+)/)[1])
+            } else if (/\S+ ?\@\S+/.test(line)) {
+                //tag @attribute value
+                const matches = line.match(/\S+ ?\@(\S+) (\S+)/)
+                attributes.push([
+                    matches[1],
+                    matches[2]
+                ])
             } else {
                 //anything else is content
                 const contentMatch = line.match(/ (.+)/)
