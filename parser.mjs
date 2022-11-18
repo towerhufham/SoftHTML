@@ -21,6 +21,8 @@ const formatElement = (tag, classes, attributes, content) => {
 }
 
 const getIndentedLines = text => {
+    //todo SKIP indented lines between ***'s
+    //or rather, keep *** lines out of the array entirely
     const lines = text.split(/\n/)
     const indented = []
     let spaces = null
@@ -46,6 +48,7 @@ const parseElement = elementText => {
     let classes = []
     let attributes = []
     let content = ""
+    let contentMode = false
     //first, check if we have an inner element to append to content
     const indented = getIndentedLines(elementText)
     if (indented.length > 0) {
@@ -58,6 +61,16 @@ const parseElement = elementText => {
         content = innerElement
     }
     for (const line of lines) {
+        //if we're in content mode, don't come out until we find ***
+        if (contentMode) {
+            if (line.startsWith("***")) {
+                contentMode = false
+            } else {
+                //todo: markdown integration
+                content += line
+            }
+            continue
+        }
         //if we haven't found a tag, first thing is the tag
         if (tag == "") {
             tag = line.match(/([\w\d]+)( \S+)?/)[1]
@@ -83,6 +96,9 @@ const parseElement = elementText => {
             if (/^\s*.?$/.test(line)) {
                 result += formatElement(tag, classes, attributes, content)
                 return result
+            } else if (line.startsWith("***")) {
+                //content mode
+                contentMode = true
             } else if (/\s*\@/.test(line)) {
                 //attributes start with @
                 const matches = line.match(/\@(\S+) (.*)/)

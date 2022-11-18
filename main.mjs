@@ -16,6 +16,9 @@ fs.readFile(fileName, (err, data) => {
         console.log(err)
     } else {
         const fullText = data.toString()
-        console.log(parseSoft(fullText))
+        const parsedText = parseSoft(fullText)
+        fs.writeFile("output.html", parsedText, () => {
+            console.log("Wrote output.html")
+        })
     }
 })

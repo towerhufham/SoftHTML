@@ -12,6 +12,15 @@ a Click Here
 @title To Google
 underline hover:text-red-500
 
+p
+***
+Hello World!
+This is a nice big paragraph. I hope lots of good things will come from SoftHTML.
+I know the code may be a bit amateurish, but please don't judge too harshly!
+The root of all evil is premature optimization or something like that.
+- Tower 
+***
+
 div.flex flex-col
     div .flex
         article @id art
