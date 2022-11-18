@@ -17,7 +17,26 @@ const formatAttributes = attributes => {
 }
 
 const formatElement = (tag, classes, attributes, content) => {
-    return `<${tag}${formatAttributes(attributes)}${formatClasses(classes)}>${content}</${tag}>\n`
+    return `<${tag}${formatAttributes(attributes)}${formatClasses(classes)}>\n  ${content}\n</${tag}>\n`
+}
+
+const getIndentedLines = text => {
+    const lines = text.split(/\n/)
+    const indented = []
+    let spaces = null
+    for (const line of lines) {
+        if (/^ +.+/.test(line)) {
+            //indented by at least 1 space
+            if (spaces === null) {
+                spaces = line.match(/^ +/)[0].length
+            }
+            if (spaces) {
+                const unindent = line.slice(spaces)
+                indented.push(unindent)
+            }
+        }
+    }
+    return indented.join("\n")
 }
 
 const parseElement = elementText => {
@@ -27,6 +46,17 @@ const parseElement = elementText => {
     let classes = []
     let attributes = []
     let content = ""
+    //first, check if we have an inner element to append to content
+    const indented = getIndentedLines(elementText)
+    if (indented.length > 0) {
+        let innerElement = parseElement(indented)
+        //make it pretty
+        //remove trailing newline
+        innerElement = innerElement.replace(/\n$/, "")
+        //add 2 spaces before every indent
+        innerElement = innerElement.replaceAll(/\n/g, "\n  ")
+        content = innerElement
+    }
     for (const line of lines) {
         //if we haven't found a tag, first thing is the tag
         if (tag == "") {
@@ -46,8 +76,8 @@ const parseElement = elementText => {
                 //todo: real support for boolean attributes
                 const val = matches[2] ? matches[2] : ""
                 attributes.push([name, val])
-            } else {
-                //anything else, treat as classes
+            } else if (/^\S/.test(line)) {
+                //anything else but whitespace, treat as classes
                 classes.push(line.trim())
             }
         }
