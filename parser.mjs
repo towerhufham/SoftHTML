@@ -93,13 +93,13 @@ const parseElement = elementText => {
         } else {
             //element has been started
             //empty line finishes element
-            if (/^\s*.?$/.test(line)) {
+            if (/^\s*$/.test(line)) {
                 result += formatElement(tag, classes, attributes, content)
                 return result
             } else if (line.startsWith("***")) {
                 //content mode
                 contentMode = true
-            } else if (/\s*\@/.test(line)) {
+            } else if (line.startsWith("@")) {
                 //attributes start with @
                 const matches = line.match(/\@(\S+) (.*)/)
                 const name = matches[1]
