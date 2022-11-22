@@ -71,9 +71,15 @@ const parseElement = elementText => {
             }
             continue
         }
-        //if we haven't found a tag, first thing is the tag
+        //if we haven't found a tag, first thing is the tag unless its a #
         if (tag == "") {
+            if (line.startsWith("#")) return ""
             tag = line.match(/([\w\d]+)( \S+)?/)[1]
+            //check for [area]
+            const area = line.match(/\[([\w\d]+)\]/)
+            if (area) {
+                content += `!!FINDAREA[${area[1]}]`
+            }
             //one-line shortcuts look like...
             if (/\S+ ?\./.test(line)) {
                 ///tag .class
@@ -117,11 +123,21 @@ const parseElement = elementText => {
     return result
 }
 
+const formatArea = (area, fullText) => {
+    //area will be like "[AREA]"
+    
+}
+
 export const parseSoft = fullText => {
     const elements = fullText.split(/\n\s*\n/)
     let result = ""
     for (const element of elements) {
         result += parseElement(element)
+    }
+    //insert [areas]
+    const areas = result.matchAll(/!!FINDAREA\[[\w\d]+\]/g)
+    for (const a of areas) {
+        result = replaceAll(a[0], formatArea(a[0]))
     }
     return result
 }
