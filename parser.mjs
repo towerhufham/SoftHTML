@@ -49,83 +49,96 @@ const parseHashBlocks = fullText => {
 class ElementNode {
     constructor(lines) {
         this.lines = lines
-        // this.tag = null
-        // this.areaName = null
-        // this.classes = []
-        // this.attributes = []
-        // this.content = []
+        this.tag = null
+        this.areaName = null
+        this.classes = []
+        this.attributes = []
+        this.content = []
         this.children = []
+        this._parse()
     }
 
-    // getHTML() {
-    //     //classes
-    //     const concatClasses = this.classes.join(" ")
-    //     let classStr = ""
-    //     let attributeStr = ""
-    //     if (concatClasses.length > 0) {
-    //         classStr = ` class="${concatClasses}"`
-    //     } else {
-    //         classStr = ""
-    //     }
-    //     //attributes
-    //     if (this.attributes.length > 0) {
-    //         attributeStr = " " + this.attributes.map(
-    //             a => `${a[0]}="${a[1]}"`
-    //         ).join(" ")
-    //     } else {
-    //         attributeStr = ""
-    //     } 
-    //     return `<${tag}${attributeStr}${classStr}>\n  ${this.content.join("\n")}\n</${tag}>\n`
-    // }
+    _parse() {
+        //first line is special
+        this._parseFirstLine()
+        //regular proceeding lines
+        let contentMode = false
+        for (const rawLine of this.lines.slice(1)) {
+            const line = rawLine.trim()
+            
+            //check for content
+            if (line.startsWith("***")) {
+                contentMode = !contentMode
+                continue
+
+            } else if (contentMode) {
+                this.content.push(line)
+            
+            } else if (line.startsWith("@")) {
+                //attributes start with @
+                const matches = line.match(/\@(\S+) (.*)/)
+                const name = matches[1]
+                //todo: real support for boolean attributes
+                const val = matches[2] ? matches[2] : ""
+                this.attributes.push([name, val])
+
+            } else if (/^\S/.test(line)) {
+                //anything else but whitespace, treat as classes
+                this.classes.push(line.trim())
+            }
+        }
+    }
+
+    _parseFirstLine() {
+        const line = this.lines[0].trim()
+        //get element tag
+        this.tag = line.match(/([\w\d]+)( \S+)?/)[1]
+        //shortcuts
+        if (/\S+ ?\./.test(line)) {
+            //tag .class
+            this.classes.push(line.match(/\S+ ?\.(.+)/)[1])
+        
+        } else if (/\S+ ?\@\S+/.test(line)) {
+            //tag @attribute value
+            const matches = line.match(/\S+ ?\@(\S+) (\S+)/)
+            this.attributes.push([
+                matches[1],
+                matches[2]
+            ])
+        
+        } else {
+            //anything else is content
+            const contentMatch = line.match(/ (.+)/)
+            if (contentMatch) this.content.push(contentMatch[1])
+        }
+    }
+
+    getHTML() {
+        //classes
+        const concatClasses = this.classes.join(" ")
+        let classStr = ""
+        if (concatClasses.length > 0) {
+            classStr = ` class="${concatClasses}"`
+        } else {
+            classStr = ""
+        }
+        //attributes
+        let attributeStr = ""
+        if (this.attributes.length > 0) {
+            attributeStr = " " + this.attributes.map(
+                a => `${a[0]}="${a[1]}"`
+            ).join(" ")
+        } else {
+            attributeStr = ""
+        } 
+        //children
+        let childrenStr = ""
+        for (const child of this.children) {
+            childrenStr += "  " + child.getHTML()
+        }
+        return `<${this.tag}${attributeStr}${classStr}>\n  ${this.content.join("\n")}${childrenStr}\n</${this.tag}>\n`
+    }
 }
-
-// class ElementTree {
-//     constructor(lines) {
-//         this.lines = lines
-//         this.rootNodes = []
-//         this._parse()
-//     }
-
-//     _parse() {
-//         //go through the hash block line by line and build the tree as we go
-//         let currentElement = new ElementNode()
-//         currentElement.parent = this.rootNodes
-//         let contentMode = false
-//         let indentLevel = 0
-
-//         for (const line of this.lines) {
-//             //STEP 1: check for content blocks between ***
-//             if (line.startsWith("***")) {
-//                 contentMode = !contentMode
-//                 continue
-//             }
-//             if (contentMode) {
-//                 currentElement.content.push(line)
-//                 continue
-//             }
-
-//             //STEP 2: check indent level
-//             const thisLineIndent = line.search(/\S|$/)
-//             if (thisLineIndent > indentLevel) {
-//                 //starting a new child
-//                 //this means the current element can be finished up
-//                 currentElement.parent.push(currentElement)
-//                 indentLevel = thisLineIndent
-//                 const parent = currentElement.children
-//                 currentElement = new ElementNode()
-//                 currentElement.parent = parent
-//                 //todo, this line is the special first line
-//                 //maybe todo shortcuts
-//             } else if (thisLineIndent < indentLevel) {
-//                 //finishing the current set of children
-//                 currentElement.parent.push(currentElement)
-//                 indentLevel = thisLineIndent
-//                 currentElement = new ElementNode()
-//                 //oooohhh problem, we don't know how MANY indents down this is...
-//             }
-//         }
-//     }
-// }
 
 const indentTree = lines => {
     //build indent list
@@ -165,17 +178,12 @@ const indentTree = lines => {
         possibleParents = possibleParents.filter(p => p[0] < depth)
     }
 
-    console.log("starting loop")
     for (let i = 0; i < indents.length; i++)  {
         const line = lines[i]
         const indent = indents[i]
-
-        console.log("line: " + line)
         
         //if empty line, element is finished
         if (indent === null) {
-            console.log("null line, finishing element")
-
             const element = new ElementNode(elementLines)
             addToParent(element)
             elementLines = []
@@ -183,11 +191,9 @@ const indentTree = lines => {
 
         } else if (indent === lastIndent) {
             //if indent matches, add to list
-            console.log("same indentation, adding to collected lines")
             elementLines.push(line)
         
         } else if (indent > lastIndent) {
-            console.log("going in deeper")
             //going deeper into the tree
             const element = new ElementNode(elementLines)
             elementLines = []
@@ -199,7 +205,6 @@ const indentTree = lines => {
             elementLines.push(line)
         
         } else if (indent < lastIndent) {
-            console.log("coming out from depth")
             //coming out from deep in the tree
             const element = new ElementNode(elementLines)
             elementLines = []
@@ -210,9 +215,6 @@ const indentTree = lines => {
             elementLines.push(line)
             lastIndent = indent
         }
-
-        console.log("possible parents: " + possibleParents)
-        console.log("\n")
     }
     //finally, add whatever we were working on
     const element = new ElementNode(elementLines)
@@ -223,12 +225,16 @@ const indentTree = lines => {
 
 export const parseSoft = fullText => {
     const hashBlocks = parseHashBlocks(fullText)
+    let out = ""
     for (const block of hashBlocks) {
         //first line of the block shouldn't get parsed
         const blockData = block.slice(1)
-        console.log(JSON.stringify(indentTree(blockData)))
+        const tree = indentTree(blockData)
+        for (const rootNode of tree) {
+            out += rootNode.getHTML()
+        }
     }
-    return "hi lol"
+    return out
 }
 
 //NEW PLAN
