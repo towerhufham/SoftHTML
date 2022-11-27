@@ -47,17 +47,14 @@ const parseHashBlocks = fullText => {
 }
 
 class ElementNode {
-    constructor(tag, areaName = null, classes = [], attributes = [], content = [], children = []) {
-        this.tag = tag
-        this.areaName = areaName
-        this.classes = classes
-        this.attributes = attributes
-        this.content = content
-        this.children = children
-    }
-
-    addChild(node) {
-        this.children.push(node)
+    constructor() {
+        this.tag = null
+        this.areaName = null
+        this.classes = []
+        this.attributes = []
+        this.content = []
+        this.children = []
+        this.parent = null
     }
 
     getHTML() {
@@ -91,10 +88,42 @@ class ElementTree {
 
     _parse() {
         //go through the hash block line by line and build the tree as we go
+        let currentElement = new ElementNode()
+        currentElement.parent = this.rootNodes
         let contentMode = false
+        let indentLevel = 0
 
-        //STEP 1: check for content
-        
+        for (const line of this.lines) {
+            //STEP 1: check for content blocks between ***
+            if (line.startsWith("***")) {
+                contentMode = !contentMode
+                continue
+            }
+            if (contentMode) {
+                currentElement.content.push(line)
+                continue
+            }
+
+            //STEP 2: check indent level
+            const thisLineIndent = line.search(/\S|$/)
+            if (thisLineIndent > indentLevel) {
+                //starting a new child
+                //this means the current element can be finished up
+                currentElement.parent.push(currentElement)
+                indentLevel = thisLineIndent
+                const parent = currentElement.children
+                currentElement = new ElementNode()
+                currentElement.parent = parent
+                //todo, this line is the special first line
+                //maybe todo shortcuts
+            } else if (thisLineIndent < indentLevel) {
+                //finishing the current set of children
+                currentElement.parent.push(currentElement)
+                indentLevel = thisLineIndent
+                currentElement = new ElementNode()
+                //oooohhh problem, we don't know how MANY indents down this is...
+            }
+        }
     }
 }
 
