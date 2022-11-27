@@ -1,23 +1,4 @@
-//process:
-//pre-scan the text file for # blocks (not in content)
-//create a syntax tree object
-//insert the #root (explicit or implicit) elements as the root nodes
-//the node objects just contain:
-//  optional [area] name
-//  list of semantic lines
-//  list of raw content, not parsed
-//  links to children
-//  function to parse into html
-//build the tree up with all the correct info before any actual parsing happens
-//the key will be linking up all the children properly
-//also let's use typescript this time
-
-// rootNodes = []
-// for each block in parseHashBlocks(fullText)
-//   if root, rootNodes.push(treeNode(block))
-//   else, idk it'll probably have to be a case by case basis
-// generateAreaTable(rootNodes) // this will scan for all [AREAS] and return a dict of them for easy access
-// generateHTML(rootNodes)
+import pretty from "pretty"
 
 const parseHashBlocks = fullText => {
     //if the first line doesn't start with a #, it's an implicit #root at the top
@@ -134,9 +115,9 @@ class ElementNode {
         //children
         let childrenStr = ""
         for (const child of this.children) {
-            childrenStr += "  " + child.getHTML()
+            childrenStr += child.getHTML()
         }
-        return `<${this.tag}${attributeStr}${classStr}>\n  ${this.content.join("\n")}${childrenStr}\n</${this.tag}>\n`
+        return `<${this.tag}${attributeStr}${classStr}>${this.content.join("\n")}${childrenStr}</${this.tag}>`
     }
 }
 
@@ -234,7 +215,8 @@ export const parseSoft = fullText => {
             out += rootNode.getHTML()
         }
     }
-    return out
+
+    return pretty(out)
 }
 
 //NEW PLAN
