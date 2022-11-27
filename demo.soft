@@ -1,3 +1,4 @@
+#root
 h1 Hello World!
 text-blue-500
 
@@ -16,6 +17,7 @@ a Click Here
 @title To Google
 underline hover:text-red-500
 
+#cool
 p
 ***
 Hello World!

@@ -35,16 +35,16 @@ const parseHashBlocks = fullText => {
     if (fullText[0] !== "#") {
         fullText = "#root\n" + fullText
     }
-    //break into lines, removing unused chars
+    //break into lines, removing unused "\r" chars
     const lines = fullText.replaceAll("\r", "").split("\n")
     let blocks = []
     let currentBlock = []
     for (const line of lines) {
-        //if it starts with a #, preceeded by optional whitespace
-        if (/^\s*\#/.test(line)) {
+        //if it starts with a #
+        if (line.startsWith("#")) {
             //start new block
-            if (blocks.length > 0) {
-                //if this isn't our first block, push to the list
+            if (currentBlock.length > 0) {
+                //if we're working on a block, push to the list
                 blocks.push([...currentBlock])
                 currentBlock = []
             }
