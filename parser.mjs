@@ -18,17 +18,6 @@
 //   else, idk it'll probably have to be a case by case basis
 // generateAreaTable(rootNodes) // this will scan for all [AREAS] and return a dict of them for easy access
 // generateHTML(rootNodes)
-// 
-// class treeNode
-//   constructor(lines)
-//      sort lines into the categories below
-//   name: string?
-//   semanticLines: string[] = []
-//   content: string[] = []
-//   children: treeNode[] = []
-//   generateHTML(areaTable): dict(string: treeNode) -> string
-//      this is basically the regular parser logic I have
-//      need a way to check for recursion eventually
 
 const parseHashBlocks = fullText => {
     //if the first line doesn't start with a #, it's an implicit #root at the top
@@ -57,7 +46,63 @@ const parseHashBlocks = fullText => {
     return blocks
 }
 
+class ElementNode {
+    constructor(tag, areaName = null, classes = [], attributes = [], content = [], children = []) {
+        this.tag = tag
+        this.areaName = areaName
+        this.classes = classes
+        this.attributes = attributes
+        this.content = content
+        this.children = children
+    }
+
+    addChild(node) {
+        this.children.push(node)
+    }
+
+    getHTML() {
+        //classes
+        const concatClasses = this.classes.join(" ")
+        let classStr = ""
+        let attributeStr = ""
+        if (concatClasses.length > 0) {
+            classStr = ` class="${concatClasses}"`
+        } else {
+            classStr = ""
+        }
+        //attributes
+        if (this.attributes.length > 0) {
+            attributeStr = " " + this.attributes.map(
+                a => `${a[0]}="${a[1]}"`
+            ).join(" ")
+        } else {
+            attributeStr = ""
+        } 
+        return `<${tag}${attributeStr}${classStr}>\n  ${this.content.join("\n")}\n</${tag}>\n`
+    }
+}
+
+class ElementTree {
+    constructor(lines) {
+        this.lines = lines
+        this.rootNodes = []
+        this._parse()
+    }
+
+    _parse() {
+        //go through the hash block line by line and build the tree as we go
+        let contentMode = false
+
+        //STEP 1: check for content
+        
+    }
+}
+
 export const parseSoft = fullText => {
-    console.log(parseHashBlocks(fullText))
+    const hashBlocks = parseHashBlocks(fullText)
+    for (const block of hashBlocks) {
+        const t = new TreeNode(block)
+        console.log(JSON.stringify(t))
+    }
     return "hi lol"
 }
