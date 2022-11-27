@@ -141,18 +141,21 @@ const indentTree = lines => {
     let possibleParents = [] //like [[0, root], [4, div]]
 
     //helpers
-    const addToParent = ele => {
+    const addToParent = () => {
+        const element = new ElementNode(elementLines)
+        elementLines = []
         if (lastIndent === 0) {
-            tree.push(ele)
+            tree.push(element)
         } else {
             const rev = [...possibleParents].reverse()
             for (const [ind, par] of rev) {
                 if (ind < lastIndent) {
-                    par.children.push(ele)
+                    par.children.push(element)
                     break
                 }
             }
         }
+        return element
     }
 
     const removeParentsOfDepth = depth => {
@@ -165,10 +168,8 @@ const indentTree = lines => {
         
         //if empty line, element is finished
         if (indent === null) {
-            const element = new ElementNode(elementLines)
-            addToParent(element)
-            elementLines = []
-            //don't update lastIndent
+            addToParent()
+            //don't update lastIndent or add this line
 
         } else if (indent === lastIndent) {
             //if indent matches, add to list
@@ -176,31 +177,27 @@ const indentTree = lines => {
         
         } else if (indent > lastIndent) {
             //going deeper into the tree
-            const element = new ElementNode(elementLines)
-            elementLines = []
-            //add this element
-            addToParent(element)
             //make this element a potential parent of more elements
+            const element = addToParent()
             possibleParents.push([lastIndent, element]) 
+
             lastIndent = indent
             elementLines.push(line)
         
         } else if (indent < lastIndent) {
             //coming out from deep in the tree
-            const element = new ElementNode(elementLines)
-            elementLines = []
-            //add this element
-            addToParent(element)
             //remove all parents of this depth and deeper
+            addToParent()
             removeParentsOfDepth(indent)
-            elementLines.push(line)
+
             lastIndent = indent
+            elementLines.push(line)
         }
     }
-    //finally, add whatever we were working on
-    const element = new ElementNode(elementLines)
-    addToParent(element)
-
+    //finally, add whatever we were working on, if extant
+    if (elementLines.length > 0) {
+        addToParent()
+    }
     return tree
 }
 
@@ -218,8 +215,3 @@ export const parseSoft = fullText => {
 
     return pretty(out)
 }
-
-//NEW PLAN
-//1: hash blocks
-//2: build node tree of indented blocks
-//3: convert node tree to html
