@@ -6,6 +6,7 @@ div.one
 
     div.two-a
     red rounded-full
+    @@click hi()
 
         p hello
 

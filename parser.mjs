@@ -227,3 +227,11 @@ export const parseSoft = fullText => {
 
     return pretty(out)
 }
+
+
+//TODO:
+//boolean attributes
+//[AREA]s
+//#file
+//mixing text content and elements
+//markdown integration
