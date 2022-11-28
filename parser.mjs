@@ -139,9 +139,14 @@ const indentTree = lines => {
     let lastIndent = 0
     let elementLines = []
     let possibleParents = [] //like [[0, root], [4, div]]
+    let lastLineNull = false
 
     //helpers
     const addToParent = () => {
+        //checks
+        if (elementLines.length === 0) return null
+        if (!/\S/.test(elementLines[0])) return null
+
         const element = new ElementNode(elementLines)
         elementLines = []
         if (lastIndent === 0) {
@@ -168,10 +173,16 @@ const indentTree = lines => {
         
         //if empty line, element is finished
         if (indent === null) {
-            addToParent()
+            lastLineNull = true
+            continue
+            // addToParent()
             //don't update lastIndent or add this line
 
         } else if (indent === lastIndent) {
+            //if we came from a null line, finish it up
+            if (lastLineNull) {
+                addToParent()
+            }
             //if indent matches, add to list
             elementLines.push(line)
         
@@ -193,11 +204,12 @@ const indentTree = lines => {
             lastIndent = indent
             elementLines.push(line)
         }
+
+        //this is skipped if it actually was a null line
+        lastLineNull = false
     }
     //finally, add whatever we were working on, if extant
-    if (elementLines.length > 0) {
-        addToParent()
-    }
+    addToParent()
     return tree
 }
 
