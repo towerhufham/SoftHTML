@@ -265,7 +265,6 @@ export const parseSoft = fullText => {
 
 //TODO:
 //boolean attributes
-//[AREA]s
 //#file
 //mixing text content and elements
 //markdown integration
@@ -273,3 +272,4 @@ export const parseSoft = fullText => {
 //#apply selector
 //(stuff to apply)
 //#template, used as components / in markdown maybe
+//extensive tests
