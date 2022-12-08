@@ -6,19 +6,7 @@ div.post-preview
 
 
 #in [LINKS]
-span { new Date(post.date).getDate() }
-post-preview__date__day
-
-span { `${getMonthName(post.date)} ${new Date(post.date).getFullYear()}` }
-post-preview__date__month-n-year
-
+span hi!
 
 #in [TEXT]
-h4
-post-preview__title
-a {post.title}
-@href {url}
-@title {post.title}
-
-p {post.description}
-post-preview__desc
+span ho!

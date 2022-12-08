@@ -71,7 +71,15 @@ class ElementNode {
     }
 
     _parseFirstLine() {
-        const line = this.lines[0].trim()
+        const rawLine = this.lines[0].trim()
+        let line = ""
+        //check for area tag
+        if (rawLine.startsWith("[")) {
+            this.areaName = rawLine.match(/^\[([\w\d]+)\]/)[1]
+            line = rawLine.slice(this.areaName.length + 3)
+        } else {
+            line = rawLine
+        }
         //get element tag
         this.tag = line.match(/([\w\d]+)( \S+)?/)[1]
         //shortcuts
@@ -216,13 +224,39 @@ const indentTree = lines => {
 export const parseSoft = fullText => {
     const hashBlocks = parseHashBlocks(fullText)
     let out = ""
+    let root = null
+
+    const insertChildTree = (parentTree, area, childTree) => {
+        if (typeof parentTree.children === "undefined") return
+        for (const node of parentTree.children) {
+            if (node.areaName === area) {
+                for (const subNode of childTree) {
+                    node.children.push(subNode)
+                }
+            } else {
+                insertChildTree(node, area, childTree)
+            }
+        }
+    }
+
     for (const block of hashBlocks) {
         //first line of the block shouldn't get parsed
         const blockData = block.slice(1)
-        const tree = indentTree(blockData)
-        for (const rootNode of tree) {
-            out += rootNode.getHTML()
+        //#root
+        if (block[0].startsWith("#root")) {
+            root = indentTree(blockData)
         }
+        //#in
+        if (block[0].startsWith("#in")) {
+            const childTree = indentTree(blockData)
+            const area = block[0].match(/\[([\w\d]+)\]/)[1]
+            for (const rootNode of root) {
+                insertChildTree(rootNode, area, childTree)
+            }
+        }
+    }
+    for (const rootNode of root) {
+        out += rootNode.getHTML()
     }
 
     return pretty(out)
