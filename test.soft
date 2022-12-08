@@ -1,26 +1,26 @@
 div.oneone
 @id other-root
 
-div.one
-@id root
+    div.one
+    @id root
 
-    div.two-a
-    red rounded-full
-    @@click hi()
+        div.two-a
+        red rounded-full
+        @@click hi()
+        ***
+        Hello!
 
-        p hello
+        div.two-b
+        blue rounded-full
 
-    div.two-b
-    blue rounded-full
+            p world!
+            @clickable true
 
-        p world!
-        @clickable true
+    div.threeish
 
-div.threeish
+        p
+        ***
+        Whew, that sure was hard! Wow-eeeee
+        ***
 
-    p
-    ***
-    Whew, that sure was hard! Wow-eeeee
-    ***
-
-    p wee!
+        p wee!

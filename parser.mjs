@@ -235,3 +235,7 @@ export const parseSoft = fullText => {
 //#file
 //mixing text content and elements
 //markdown integration
+//self closing tags
+//#apply selector
+//(stuff to apply)
+//#template, used as components / in markdown maybe
